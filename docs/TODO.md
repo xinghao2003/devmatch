@@ -1,4 +1,4 @@
-# Minimal MVP Development Plan for AidChain
+# Minimal MVP Development Plan for TraceAid
 
 ## 🎯 MVP Scope
 
@@ -220,7 +220,7 @@ The MVP is complete when:
 
 This approach provides a solid foundation that can be extended with additional features post-MVP while keeping the initial scope manageable and achievable.
 
-Based on the AidChain MVP project structure, here are **three parallel development tracks** that can be worked on concurrently by different team members:
+Based on the TraceAid MVP project structure, here are **three parallel development tracks** that can be worked on concurrently by different team members:
 
 ## 🔗 Track 1: Smart Contract & Blockchain Infrastructure
 

@@ -53,7 +53,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                     <Heart className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-xl font-bold text-white">AidChain</h1>
+                    <h1 className="text-xl font-bold text-white">TraceAid</h1>
                     <p className="text-xs text-white/60">Transparent Relief Tracking</p>
                   </div>
                 </Link>
@@ -67,11 +67,10 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`px-4 py-2 rounded-xl flex items-center space-x-2 transition-all duration-300 ${
-                        isActive(item.href)
+                      className={`px-4 py-2 rounded-xl flex items-center space-x-2 transition-all duration-300 ${isActive(item.href)
                           ? "bg-white/20 text-white shadow-lg"
                           : "text-white/70 hover:bg-white/10 hover:text-white"
-                      }`}
+                        }`}
                     >
                       <Icon className="h-4 w-4" />
                       <span className="font-medium">{item.name}</span>
@@ -160,11 +159,10 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                       key={item.name}
                       href={item.href}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className={`block px-3 py-2 rounded-xl transition-all duration-300 ${
-                        isActive(item.href)
+                      className={`block px-3 py-2 rounded-xl transition-all duration-300 ${isActive(item.href)
                           ? "bg-white/20 text-white"
                           : "text-white/70 hover:bg-white/10 hover:text-white"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center space-x-3">
                         <Icon className="h-5 w-5" />
@@ -215,7 +213,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                     <Heart className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">AidChain</h3>
+                    <h3 className="text-lg font-bold text-white">TraceAid</h3>
                     <p className="text-xs text-white/60">Transparent Relief Tracking</p>
                   </div>
                 </div>
@@ -264,7 +262,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
             </div>
 
             <div className="border-t border-white/10 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-              <div className="text-sm text-white/60">© 2024 AidChain. Built for transparency in humanitarian aid.</div>
+              <div className="text-sm text-white/60">© 2024 TraceAid. Built for transparency in humanitarian aid.</div>
               <div className="flex items-center space-x-2 text-white/60 text-sm">
                 <Globe className="h-4 w-4" />
                 <span>Powered by Oasis Network</span>

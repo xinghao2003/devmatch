@@ -19,7 +19,7 @@ export default function Home() {
       <div className="backdrop-blur-3xl bg-black/10 p-8 rounded-2xl">
         <div className="text-center text-white">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p>Redirecting to AidChain...</p>
+          <p>Redirecting to TraceAid...</p>
         </div>
       </div>
     </div>

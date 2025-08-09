@@ -5,7 +5,7 @@ import "~~/styles/globals.css";
 import { getMetadata } from "~~/utils/scaffold-eth/getMetadata";
 
 export const metadata = getMetadata({
-  title: "AidChain - Transparent Relief Tracking",
+  title: "TraceAid - Transparent Relief Tracking",
   description:
     "Blockchain-based disaster relief supply chain tracking system. Every package tracked, every delivery verified.",
 });

@@ -1,80 +1,136 @@
-# 🏗 Scaffold-ETH 2
+# 🚚 TraceAid - Blockchain Supply Chain Tracking
 
-<h4 align="center">
-  <a href="https://docs.scaffoldeth.io">Documentation</a> |
-  <a href="https://scaffoldeth.io">Website</a>
-</h4>
+**Transparent, Immutable Supply Chain Management for Humanitarian Aid**
 
-🧪 An open-source, up-to-date toolkit for building decentralized applications (dapps) on the Ethereum blockchain. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts.
+TraceAid is a blockchain-based shipment tracking system that provides end-to-end transparency for supply chains. Built on Ethereum, it enables organizations, field workers, and the public to track shipments with complete accountability and real-time verification.
 
-⚙️ Built using NextJS, RainbowKit, Hardhat, Wagmi, Viem, and Typescript.
+## ✨ Features
 
-- ✅ **Contract Hot Reload**: Your frontend auto-adapts to your smart contract as you edit it.
-- 🪝 **[Custom hooks](https://docs.scaffoldeth.io/hooks/)**: Collection of React hooks wrapper around [wagmi](https://wagmi.sh/) to simplify interactions with smart contracts with typescript autocompletion.
-- 🧱 [**Components**](https://docs.scaffoldeth.io/components/): Collection of common web3 components to quickly build your frontend.
-- 🔥 **Burner Wallet & Local Faucet**: Quickly test your application with a burner wallet and local faucet.
-- 🔐 **Integration with Wallet Providers**: Connect to different wallet providers and interact with the Ethereum network.
+- 🏢 **Organization Dashboard** - Create and manage shipments
+- 📍 **Field Worker Interface** - Add checkpoints and mark deliveries
+- 🔍 **Public Tracking** - Transparent shipment verification (no wallet required)
+- 🔐 **Role-Based Access Control** - Secure, permission-based operations
+- ⚡ **Real-Time Updates** - Live blockchain data synchronization
+- 🎨 **Modern UI** - Glass morphism design with smooth animations
 
-![Debug Contracts tab](https://github.com/scaffold-eth/scaffold-eth-2/assets/55535804/b237af0c-5027-4849-a5c1-2e31495cccb1)
-
-## Requirements
-
-Before you begin, you need to install the following tools:
-
-- [Node (>= v20.18.3)](https://nodejs.org/en/download/)
-- Yarn ([v1](https://classic.yarnpkg.com/en/docs/install/) or [v2+](https://yarnpkg.com/getting-started/install))
-- [Git](https://git-scm.com/downloads)
-
-## Quickstart
-
-To get started with Scaffold-ETH 2, follow the steps below:
-
-1. Install dependencies if it was skipped in CLI:
+## 🏗 Project Structure
 
 ```
-cd my-dapp-example
+TraceAid/
+├── packages/
+│   ├── hardhat/              # Smart contract development
+│   │   ├── contracts/        # Solidity contracts
+│   │   │   └── ShipmentTracker.sol
+│   │   ├── deploy/          # Contract deployment scripts
+│   │   └── test/            # Contract tests
+│   └── nextjs/              # Frontend application
+│       ├── app/
+│       │   ├── (roles)/     # Role-based pages
+│       │   │   ├── org/     # Organization interface
+│       │   │   ├── field/   # Field worker interface
+│       │   │   └── public/  # Public tracking
+│       │   └── debug/       # Contract debugging
+│       ├── contexts/        # React contexts
+│       └── hooks/          # Custom Web3 hooks
+├── docs/
+│   ├── DEMO.md             # Complete demo instructions
+│   └── CLAUDE.md           # Development guidelines
+└── README.md               # This file
+```
+
+## 🚀 Quick Test (2 Minutes)
+
+**Prerequisites**: Node.js (≥20.18.3), Yarn, Git, MetaMask
+
+```bash
+# 1. Install dependencies
 yarn install
-```
 
-2. Run a local network in the first terminal:
-
-```
+# 2. Start local blockchain (Terminal 1)
 yarn chain
-```
 
-This command starts a local Ethereum network using Hardhat. The network runs on your local machine and can be used for testing and development. You can customize the network configuration in `packages/hardhat/hardhat.config.ts`.
-
-3. On a second terminal, deploy the test contract:
-
-```
+# 3. Deploy contracts (Terminal 2)
 yarn deploy
-```
 
-This command deploys a test smart contract to the local network. The contract is located in `packages/hardhat/contracts` and can be modified to suit your needs. The `yarn deploy` command uses the deploy script located in `packages/hardhat/deploy` to deploy the contract to the network. You can also customize the deploy script.
-
-4. On a third terminal, start your NextJS app:
-
-```
+# 4. Start frontend (Terminal 3)
 yarn start
 ```
 
-Visit your app on: `http://localhost:3000`. You can interact with your smart contract using the `Debug Contracts` page. You can tweak the app config in `packages/nextjs/scaffold.config.ts`.
+### Demo Flow
 
-Run smart contract test with `yarn hardhat:test`
+1. **Visit**: `http://localhost:3000`
 
-- Edit your smart contracts in `packages/hardhat/contracts`
-- Edit your frontend homepage at `packages/nextjs/app/page.tsx`. For guidance on [routing](https://nextjs.org/docs/app/building-your-application/routing/defining-routes) and configuring [pages/layouts](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts) checkout the Next.js documentation.
-- Edit your deployment scripts in `packages/hardhat/deploy`
+2. **Organization Role** (Create Shipment):
 
+   - Connect MetaMask with: `0x70997970C51812dc3A010C7d01b50e0d17dc79C8`
+   - Go to `/org/create`
+   - Create shipment: "Emergency Supplies" from "KL" to "Sabah"
 
-## Documentation
+3. **Field Worker Role** (Update Status):
 
-Visit our [docs](https://docs.scaffoldeth.io) to learn how to start building with Scaffold-ETH 2.
+   - Switch MetaMask to: `0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC`
+   - Go to `/field/checkpoint` → Add checkpoint "Warehouse A"
+   - Go to `/field/delivery` → Mark delivered at "Village Center"
 
-To know more about its features, check out our [website](https://scaffoldeth.io).
+4. **Public Tracking** (Verify):
+   - Visit `/public/track/1` (no wallet needed)
+   - See complete transparent shipment history
 
-## Contributing to Scaffold-ETH 2
+> **Note**: Use Hardhat accounts #1 (ORG) and #2 (FIELD) for role-based testing. Complete demo instructions in [`docs/DEMO.md`](docs/DEMO.md).
 
-We welcome contributions to Scaffold-ETH 2!
+## 🛠 Tech Stack
 
-Please see [CONTRIBUTING.MD](https://github.com/scaffold-eth/scaffold-eth-2/blob/main/CONTRIBUTING.md) for more information and guidelines for contributing to Scaffold-ETH 2.
+- **Blockchain**: Ethereum, Hardhat, Solidity
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Web3**: Wagmi, Viem, RainbowKit
+- **UI**: Tailwind CSS, DaisyUI, Framer Motion
+- **Icons**: Lucide React
+- **Notifications**: React Hot Toast
+
+## 📖 Development
+
+```bash
+# Testing
+yarn test                    # Run smart contract tests
+yarn lint                   # Lint all packages
+yarn format                 # Format code
+
+# Type Checking
+yarn next:check-types       # Frontend TypeScript
+yarn hardhat:check-types    # Contracts TypeScript
+
+# Deployment
+yarn vercel                 # Deploy to Vercel
+yarn ipfs                   # Deploy to IPFS
+```
+
+**Key URLs**:
+
+- Frontend: `http://localhost:3000`
+- Debug Contracts: `http://localhost:3000/debug`
+- Block Explorer: `http://localhost:3000/blockexplorer`
+
+## 🎯 Core Concept
+
+**Supply Chain Transparency through Blockchain**
+
+1. **Immutable Records** - All shipment data stored permanently on-chain
+2. **Role-Based Security** - Only authorized parties can update shipment status
+3. **Public Verification** - Anyone can verify the complete audit trail
+4. **Real-Time Tracking** - Status updates immediately visible to all stakeholders
+
+## 📋 Smart Contract Functions
+
+- `createShipment()` - Organization creates new shipment
+- `addCheckpoint()` - Field worker adds location update
+- `markDelivered()` - Field worker finalizes delivery
+- `getShipment()` - Public reads shipment details
+- `getCheckpoints()` - Public reads full tracking history
+
+## 🤝 Contributing
+
+Built on [Scaffold-ETH 2](https://scaffoldeth.io) framework. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for development guidelines.
+
+---
+
+**TraceAid** - Bringing transparency and accountability to humanitarian supply chains through blockchain technology.
