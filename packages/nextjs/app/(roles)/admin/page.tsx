@@ -1,3 +1,6 @@
+export default function AdminDisabled() {
+  return null;
+}
 "use client";
 
 import React from "react";

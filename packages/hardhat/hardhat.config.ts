@@ -125,6 +125,11 @@ const config: HardhatUserConfig = {
       url: "https://alfajores-forno.celo-testnet.org",
       accounts: [deployerPrivateKey],
     },
+    // Oasis Sapphire Testnet (values based on public docs; adjust if needed)
+    sapphireTestnet: {
+      url: "https://testnet.sapphire.oasis.io",
+      accounts: [deployerPrivateKey],
+    },
   },
   // Configuration for harhdat-verify plugin
   etherscan: {

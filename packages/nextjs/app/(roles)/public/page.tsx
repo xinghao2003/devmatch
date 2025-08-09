@@ -41,57 +41,26 @@ const PublicHome: React.FC = () => {
 
   // Mock recent shipments for public view
   const recentShipments = [
-    {
-      id: "SHP-001",
-      description: "Emergency Medical Supplies",
-      destination: "Port-au-Prince, Haiti",
-      status: "delivered",
-      value: "$45,000",
-      ngo: "Red Cross International",
-    },
-    {
-      id: "SHP-002",
-      description: "Food & Water Distribution",
-      destination: "Dhaka, Bangladesh",
-      status: "in-transit",
-      value: "$32,000",
-      ngo: "UNICEF",
-    },
-    {
-      id: "SHP-003",
-      description: "Educational Materials",
-      destination: "Nairobi, Kenya",
-      status: "delivered",
-      value: "$18,500",
-      ngo: "Save the Children",
-    },
+    { id: "1", description: "Emergency Medical Supplies", destination: "Port-au-Prince, Haiti", status: "delivered", value: "$45,000", ngo: "Red Cross International" },
+    { id: "2", description: "Food & Water Distribution", destination: "Dhaka, Bangladesh", status: "in-transit", value: "$32,000", ngo: "UNICEF" },
+    { id: "3", description: "Educational Materials", destination: "Nairobi, Kenya", status: "delivered", value: "$18,500", ngo: "Save the Children" },
   ];
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/public/track/${searchQuery.trim()}`);
-    } else {
-      toast.error("Please enter a shipment ID to track");
+    const raw = searchQuery.trim();
+    const match = raw.match(/\d+/);
+    if (!match) {
+      toast.error("Enter a numeric shipment ID (e.g., 1)");
+      return;
     }
+    router.push(`/public/track/${match[0]}`);
   };
 
   const features = [
-    {
-      icon: Shield,
-      title: "Blockchain Secured",
-      description: "Every transaction is immutably recorded on the Oasis Sapphire blockchain",
-    },
-    {
-      icon: Zap,
-      title: "Real-time Tracking",
-      description: "Track your aid shipments with live updates from origin to destination",
-    },
-    {
-      icon: Heart,
-      title: "Full Transparency",
-      description: "Complete visibility into how your donations are making an impact",
-    },
+    { icon: Shield, title: "Blockchain Secured", description: "Every transaction is immutably recorded on the Oasis Sapphire blockchain" },
+    { icon: Zap, title: "Real-time Tracking", description: "Track your aid shipments with live updates from origin to destination" },
+    { icon: Heart, title: "Full Transparency", description: "Complete visibility into how your donations are making an impact" },
   ];
 
   return (
@@ -100,9 +69,7 @@ const PublicHome: React.FC = () => {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-6">
         <h1 className="text-4xl lg:text-6xl font-bold text-white mb-4">
           Track Aid
-          <span className="block text-gradient bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
-            With Confidence
-          </span>
+          <span className="block text-gradient bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">With Confidence</span>
         </h1>
         <p className="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
           Follow humanitarian shipments in real-time with blockchain-verified transparency. Every package tracked, every
@@ -110,13 +77,7 @@ const PublicHome: React.FC = () => {
         </p>
 
         {/* Search Bar */}
-        <motion.form
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          onSubmit={handleSearch}
-          className="max-w-2xl mx-auto"
-        >
+        <motion.form initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} onSubmit={handleSearch} className="max-w-2xl mx-auto">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-white/50" />
@@ -125,7 +86,7 @@ const PublicHome: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Enter Shipment ID (e.g., SHP-001)"
+              placeholder="Enter Shipment ID (e.g., 1)"
               className="w-full pl-12 pr-32 py-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-lg"
             />
             <button type="submit" className="absolute inset-y-0 right-0 pr-2 flex items-center">
@@ -139,12 +100,8 @@ const PublicHome: React.FC = () => {
 
         <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-white/60">
           <span>Try:</span>
-          {["SHP-001", "SHP-002", "SHP-003"].map(id => (
-            <button
-              key={id}
-              onClick={() => setSearchQuery(id)}
-              className="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 transition-all cursor-pointer"
-            >
+          {["1", "2", "3"].map(id => (
+            <button key={id} onClick={() => setSearchQuery(id)} className="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 transition-all cursor-pointer">
               {id}
             </button>
           ))}

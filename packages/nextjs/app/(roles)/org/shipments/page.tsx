@@ -3,14 +3,15 @@
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowRight, Calendar, DollarSign, MapPin, Package, Search } from "lucide-react";
+import { ArrowRight, Building, Calendar, DollarSign, MapPin, Package, Search } from "lucide-react";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 
-const BrowseShipments: React.FC = () => {
+const OrgShipmentsPage: React.FC = () => {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [query, setQuery] = useState("");
 
-  const { data: total } = useScaffoldReadContract({
+  // Read total shipments and derive id list
+  const { data: total, refetch: refetchTotal } = useScaffoldReadContract({
     contractName: "ShipmentTracker",
     functionName: "totalShipments",
     args: [],
@@ -20,50 +21,53 @@ const BrowseShipments: React.FC = () => {
   const ids = useMemo(() => Array.from({ length: count }, (_, i) => i + 1), [count]);
 
   const filteredIds = useMemo(() => {
-    const raw = searchQuery.trim();
-    if (!raw) return ids;
-    const num = Number(raw);
-    if (!isNaN(num)) return ids.filter(id => id === num);
-    return ids;
-  }, [ids, searchQuery]);
+    if (!query.trim()) return ids;
+    const n = Number(query.trim());
+    if (!isNaN(n)) return ids.filter(id => id === n);
+    return ids; // for MVP only numeric filter
+  }, [ids, query]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-white">Browse Shipments</h1>
-          <p className="text-xl text-white/80 max-w-2xl mx-auto">Explore all shipments, updated live from the contract.</p>
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6">
+          <h1 className="text-3xl font-bold text-white mb-2">Shipments</h1>
+          <p className="text-white/70">Live list sourced from the smart contract.</p>
         </div>
       </motion.div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-        <div className="glass-card space-y-4">
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-white/50" />
-            </div>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search by shipment ID (e.g., 1)"
-              className="w-full pl-12 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
+      {/* Search by ID */}
+      <div className="glass-card p-4">
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-white/50" />
+          </div>
+          <input
+            type="text"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Search by shipment ID (e.g., 1)"
+            className="w-full pl-12 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+          <div className="mt-3 flex gap-3">
+            <button onClick={() => refetchTotal()} className="glass-button text-white">Refresh</button>
+            <button onClick={() => setQuery("")} className="glass-button text-white">Clear</button>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {filteredIds.map((id, idx) => (
-          <ShipmentCard key={id} id={id} index={idx} onOpen={() => router.push(`/public/track/${id}`)} />
-        ))}
+        {filteredIds.map((id, index) => (
+          <ShipmentCard key={id} id={id} index={index} onOpen={() => router.push(`/public/track/${id}`)} />)
+        )}
       </div>
     </div>
   );
 };
 
-export default BrowseShipments;
+export default OrgShipmentsPage;
 
+// Isolated card component so hooks are used safely
 const ShipmentCard: React.FC<{ id: number; index: number; onOpen: () => void }> = ({ id, index, onOpen }) => {
   const { data: s } = useScaffoldReadContract({
     contractName: "ShipmentTracker",
@@ -71,12 +75,14 @@ const ShipmentCard: React.FC<{ id: number; index: number; onOpen: () => void }> 
     args: [BigInt(id)],
     watch: true,
   });
+
   if (!s) return null;
+
   const statusLabel = s.status === 2n ? "Delivered" : s.status === 1n ? "In Transit" : "Created";
-  const statusColor = s.status === 2n ? "bg-green-500/20 text-green-400" : s.status === 1n ? "bg-blue-500/20 text-blue-400" : "bg-yellow-500/20 text-yellow-400";
-  const progress = s.status === 2n ? 100 : s.status === 1n ? 60 : 20;
+  const statusKey = s.status === 2n ? "delivered" : s.status === 1n ? "in-transit" : "processing";
+
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + index * 0.05 }}>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * index }}>
       <div className="glass-card hover:bg-white/15 transition-all cursor-pointer group" onClick={onOpen}>
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start space-x-3">
@@ -88,8 +94,9 @@ const ShipmentCard: React.FC<{ id: number; index: number; onOpen: () => void }> 
               <p className="text-sm text-white/70">{s.description}</p>
             </div>
           </div>
-          <div className={`px-2 py-1 rounded-full text-xs font-medium ${statusColor}`}>{statusLabel}</div>
+          <div className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(statusKey)}`}>{statusLabel}</div>
         </div>
+
         <div className="space-y-3">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center space-x-2 text-white/70">
@@ -103,22 +110,19 @@ const ShipmentCard: React.FC<{ id: number; index: number; onOpen: () => void }> 
               <span className="font-mono text-xs">{s.currentCustodian.slice(0, 6)}...{s.currentCustodian.slice(-4)}</span>
             </div>
           </div>
+
           <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center space-x-2 text-white/70">
+              <Building className="h-4 w-4" />
+              <span>—</span>
+            </div>
             <div className="flex items-center space-x-2 text-white/70">
               <Calendar className="h-4 w-4" />
               <span>id: {id}</span>
             </div>
           </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-white/70">Progress</span>
-              <span className="text-white/70">{progress}%</span>
-            </div>
-            <div className="w-full bg-white/10 rounded-full h-2">
-              <div className="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
-            </div>
-          </div>
         </div>
+
         <div className="mt-4 pt-3 border-t border-white/10">
           <div className="flex items-center justify-between text-sm">
             <span className="text-blue-400 group-hover:text-blue-300 transition-colors flex items-center">
@@ -131,3 +135,16 @@ const ShipmentCard: React.FC<{ id: number; index: number; onOpen: () => void }> 
     </motion.div>
   );
 };
+
+function getStatusColor(status: "delivered" | "in-transit" | "processing") {
+  switch (status) {
+    case "delivered":
+      return "bg-green-500/20 text-green-400";
+    case "in-transit":
+      return "bg-blue-500/20 text-blue-400";
+    default:
+      return "bg-yellow-500/20 text-yellow-400";
+  }
+}
+
+

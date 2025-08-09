@@ -54,24 +54,24 @@ const FieldDashboard: React.FC = () => {
           <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6">
             <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
             <div className="space-y-3">
-              <button className="w-full flex items-center justify-between p-3 bg-blue-500/20 hover:bg-blue-500/30 rounded-xl transition-colors text-white">
+              <a href="/field/scan" className="w-full flex items-center justify-between p-3 bg-blue-500/20 hover:bg-blue-500/30 rounded-xl transition-colors text-white">
                 <div className="flex items-center">
                   <QrCode className="h-5 w-5 mr-3" />
                   <span>Scan Shipment</span>
                 </div>
-              </button>
-              <button className="w-full flex items-center justify-between p-3 bg-green-500/20 hover:bg-green-500/30 rounded-xl transition-colors text-white">
+              </a>
+              <a href="/field/checkpoint" className="w-full flex items-center justify-between p-3 bg-green-500/20 hover:bg-green-500/30 rounded-xl transition-colors text-white">
                 <div className="flex items-center">
                   <MapPin className="h-5 w-5 mr-3" />
                   <span>Log Checkpoint</span>
                 </div>
-              </button>
-              <button className="w-full flex items-center justify-between p-3 bg-purple-500/20 hover:bg-purple-500/30 rounded-xl transition-colors text-white">
+              </a>
+              <a href="/field/delivery" className="w-full flex items-center justify-between p-3 bg-purple-500/20 hover:bg-purple-500/30 rounded-xl transition-colors text-white">
                 <div className="flex items-center">
                   <CheckCircle className="h-5 w-5 mr-3" />
                   <span>Mark Delivered</span>
                 </div>
-              </button>
+              </a>
             </div>
           </div>
 

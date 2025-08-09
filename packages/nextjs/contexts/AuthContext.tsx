@@ -2,8 +2,9 @@
 
 import React, { ReactNode, createContext, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useAccount } from "wagmi";
 
-export type UserRole = "public" | "field" | "org" | "admin";
+export type UserRole = "public" | "field" | "org";
 
 export interface User {
   address: string;
@@ -42,86 +43,57 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Mock user database - in production, this would be fetched from blockchain/backend
-  const mockUsers: Record<string, Omit<User, "address">> = {
-    // Admin wallet
-    "0xab3243233c27b49066e89ae1ef6d2cba024ee37c": {
-      role: "admin",
-      name: "System Admin",
-      organization: "AidChain Platform",
-      permissions: ["read", "write", "admin", "manage_users", "system_config"],
-    },
-    // NGO wallet
-    "0x892d35cc6634c0532925a3b844bc9e7595f0beb8": {
-      role: "org",
-      name: "NGO Coordinator",
-      organization: "Red Cross International",
-      permissions: ["read", "write", "create_shipments", "manage_team"],
-    },
-    // Field worker wallet
-    "0x992d35cc6634c0532925a3b844bc9e7595f0beb9": {
-      role: "field",
-      name: "Field Worker",
-      organization: "Red Cross International",
-      permissions: ["read", "scan", "checkpoint", "delivery"],
-    },
-  };
+  // Hardcoded roles (must mirror ShipmentTracker.sol)
+  const ORG_WALLET = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8".toLowerCase();
+  const FIELD_WALLET = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC".toLowerCase();
+
+  const { address } = useAccount();
 
   useEffect(() => {
     // Check for stored authentication
-    const storedUser = localStorage.getItem("aidchain_user");
-    if (storedUser) {
-      try {
-        const parsed = JSON.parse(storedUser);
-        setUser(parsed);
-      } catch (error) {
-        console.error("Failed to parse stored user:", error);
-        localStorage.removeItem("aidchain_user");
-      }
-    } else {
-      // Set default public user for anonymous access
-      setUser({
-        address: "anonymous",
-        role: "public",
-        permissions: ["read"],
-      });
-    }
+    // Default to public
+    setUser({ address: "anonymous", role: "public", permissions: ["read"] });
     setIsLoading(false);
   }, []);
 
-  const login = async (address: string, role?: UserRole) => {
+  // Auto-assign role based on connected wallet
+  useEffect(() => {
+    if (!address) return;
+    const addr = address.toLowerCase();
+    let role: UserRole = "public";
+    let permissions: string[] = ["read"];
+
+    if (addr === ORG_WALLET) {
+      role = "org";
+      permissions = ["read", "write", "create_shipments"];
+    } else if (addr === FIELD_WALLET) {
+      role = "field";
+      permissions = ["read", "scan", "checkpoint", "delivery"];
+    }
+
+    const newUser: User = { address: addr, role, permissions };
+    setUser(newUser);
+    if (role !== "public") localStorage.setItem("aidchain_user", JSON.stringify(newUser));
+  }, [address]);
+
+  const login = async (inputAddress: string, role?: UserRole) => {
     setIsLoading(true);
     try {
-      const normalizedAddress = address.toLowerCase();
-      const userData = mockUsers[normalizedAddress];
-
-      if (userData || role === "public") {
-        const newUser: User = {
-          address: normalizedAddress,
-          role: role || userData?.role || "public",
-          name: userData?.name,
-          organization: userData?.organization,
-          permissions: userData?.permissions || ["read"],
-        };
-
-        setUser(newUser);
-
-        // Don't store public users
-        if (newUser.role !== "public") {
-          localStorage.setItem("aidchain_user", JSON.stringify(newUser));
-        }
-
-        toast.success(`Welcome${newUser.name ? `, ${newUser.name}` : ""}!`);
-      } else {
-        // Default to public role for unregistered addresses
-        const publicUser: User = {
-          address: normalizedAddress,
-          role: "public",
-          permissions: ["read"],
-        };
-        setUser(publicUser);
-        toast.success("Connected as public user");
+      const normalizedAddress = inputAddress.toLowerCase();
+      let computedRole: UserRole = "public";
+      let permissions: string[] = ["read"];
+      if (normalizedAddress === ORG_WALLET) {
+        computedRole = "org";
+        permissions = ["read", "write", "create_shipments"];
+      } else if (normalizedAddress === FIELD_WALLET) {
+        computedRole = "field";
+        permissions = ["read", "scan", "checkpoint", "delivery"];
       }
+
+      const newUser: User = { address: normalizedAddress, role: role || computedRole, permissions };
+      setUser(newUser);
+      if (newUser.role !== "public") localStorage.setItem("aidchain_user", JSON.stringify(newUser));
+      toast.success("Wallet connected");
     } catch (error) {
       toast.error("Failed to authenticate user");
       console.error("Login error:", error);
@@ -138,23 +110,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const switchRole = (role: UserRole) => {
     if (!user) return;
-
-    // Allow switching to public from any role
-    if (role === "public") {
-      const updatedUser = { ...user, role };
-      setUser(updatedUser);
-      return;
-    }
-
-    // For other roles, check if user has access
-    const userData = mockUsers[user.address];
-    if (userData && userData.role === role) {
-      const updatedUser = { ...user, role };
-      setUser(updatedUser);
-      localStorage.setItem("aidchain_user", JSON.stringify(updatedUser));
-    } else {
-      toast.error("Access denied for this role");
-    }
+    const updatedUser = { ...user, role };
+    setUser(updatedUser);
+    if (role !== "public") localStorage.setItem("aidchain_user", JSON.stringify(updatedUser));
   };
 
   const hasPermission = (permission: string): boolean => {
@@ -165,8 +123,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!user) return "/public";
 
     switch (user.role) {
-      case "admin":
-        return "/admin";
       case "org":
         return "/org";
       case "field":

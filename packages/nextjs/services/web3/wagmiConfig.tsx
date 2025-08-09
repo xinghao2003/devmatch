@@ -15,7 +15,8 @@ export const enabledChains = targetNetworks.find((network: Chain) => network.id 
 export const wagmiConfig = createConfig({
   chains: enabledChains,
   connectors: wagmiConnectors,
-  ssr: true,
+  // Disable SSR usage in wagmi to avoid IndexedDB access on the server
+  ssr: false,
   client: ({ chain }) => {
     let rpcFallbacks = [http()];
     const rpcOverrideUrl = (scaffoldConfig.rpcOverrides as ScaffoldConfig["rpcOverrides"])?.[chain.id];
