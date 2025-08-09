@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -20,31 +19,43 @@ import {
   Zap,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useShipmentData } from "~~/hooks/scaffold-eth";
 
 const PublicHome: React.FC = () => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Mock data for public stats
-  const { data: publicStats } = useQuery({
-    queryKey: ["public-stats"],
-    queryFn: async () => ({
-      totalShipments: 1247,
-      delivered: 1158,
-      totalValue: "$12.4M",
-      countriesReached: 23,
-      activeNGOs: 47,
-      successRate: 94.3,
-    }),
-    refetchInterval: 30000,
-  });
+    // Real blockchain data
+  const {
+    shipments,
+    totalShipments,
+    loading,
+    error,
+    getStatusLabel
+  } = useShipmentData();
 
-  // Mock recent shipments for public view
-  const recentShipments = [
-    { id: "1", description: "Emergency Medical Supplies", destination: "Port-au-Prince, Haiti", status: "delivered", value: "$45,000", ngo: "Red Cross International" },
-    { id: "2", description: "Food & Water Distribution", destination: "Dhaka, Bangladesh", status: "in-transit", value: "$32,000", ngo: "UNICEF" },
-    { id: "3", description: "Educational Materials", destination: "Nairobi, Kenya", status: "delivered", value: "$18,500", ngo: "Save the Children" },
-  ];
+  // Calculate stats from real data
+  const publicStats = {
+    totalShipments: Number(totalShipments || 0),
+    delivered: shipments.filter(s => s.status === 2).length,
+    totalValue: "$0", // Not tracked in MVP
+    countriesReached: new Set(shipments.map(s => s.destination.split(',')[1]?.trim() || 'Unknown')).size,
+    activeNGOs: 1, // Hardcoded for MVP
+    successRate: totalShipments ? Math.round((shipments.filter(s => s.status === 2).length / shipments.length) * 100) : 0,
+  };
+
+  // Get recent shipments (last 3)
+  const recentShipments = shipments
+    .slice(-3)
+    .reverse()
+    .map(shipment => ({
+      id: shipment.id.toString(),
+      description: shipment.description,
+      destination: shipment.destination,
+      status: getStatusLabel(shipment.status).toLowerCase().replace(' ', '-'),
+      value: "$0", // Not tracked in MVP
+      ngo: "AidChain Organization", // Hardcoded for MVP
+    }));
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,6 +73,48 @@ const PublicHome: React.FC = () => {
     { icon: Zap, title: "Real-time Tracking", description: "Track your aid shipments with live updates from origin to destination" },
     { icon: Heart, title: "Full Transparency", description: "Complete visibility into how your donations are making an impact" },
   ];
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="space-y-12">
+        <div className="text-center space-y-6">
+          <div className="animate-pulse">
+            <div className="h-16 bg-white/10 rounded-lg mb-4"></div>
+            <div className="h-8 bg-white/10 rounded-lg mb-6"></div>
+            <div className="h-12 bg-white/10 rounded-lg max-w-2xl mx-auto"></div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 lg:gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="glass-card text-center animate-pulse">
+              <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-white/10"></div>
+              <div className="h-8 bg-white/10 rounded mb-1"></div>
+              <div className="h-4 bg-white/10 rounded"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="text-center space-y-6">
+        <div className="glass-card bg-red-500/10 border-red-500/20">
+          <h2 className="text-2xl font-bold text-red-400 mb-4">Error Loading Data</h2>
+          <p className="text-red-300 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="glass-button bg-red-500/20 text-red-300"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-12">

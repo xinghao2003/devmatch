@@ -3,14 +3,75 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { CheckCircle, Clock, MapPin, Package, QrCode } from "lucide-react";
+import { useShipmentData } from "~~/hooks/scaffold-eth";
 
 const FieldDashboard: React.FC = () => {
+    // Real blockchain data
+  const {
+    shipments,
+    totalShipments,
+    loading,
+    error,
+    getStatusLabel
+  } = useShipmentData();
+
+  // Calculate stats from real data
+  const totalShipmentsCount = Number(totalShipments || 0);
+  const activeShipments = shipments.filter(s => s.status === 0 || s.status === 1).length;
+  const pendingDeliveries = shipments.filter(s => s.status === 1).length;
+  const completedShipments = shipments.filter(s => s.status === 2).length;
+
   const stats = [
-    { name: "Today's Scans", value: "24", icon: QrCode, color: "bg-blue-500" },
-    { name: "Active Shipments", value: "8", icon: Package, color: "bg-green-500" },
-    { name: "Pending Deliveries", value: "3", icon: Clock, color: "bg-yellow-500" },
-    { name: "Completed", value: "12", icon: CheckCircle, color: "bg-emerald-500" },
+    { name: "Total Shipments", value: totalShipmentsCount.toString(), icon: QrCode, color: "bg-blue-500" },
+    { name: "Active Shipments", value: activeShipments.toString(), icon: Package, color: "bg-green-500" },
+    { name: "Pending Deliveries", value: pendingDeliveries.toString(), icon: Clock, color: "bg-yellow-500" },
+    { name: "Completed", value: completedShipments.toString(), icon: CheckCircle, color: "bg-emerald-500" },
   ];
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6">
+          <div className="animate-pulse">
+            <div className="h-8 bg-white/10 rounded mb-2"></div>
+            <div className="h-4 bg-white/10 rounded"></div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 animate-pulse">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-white/10 rounded-full"></div>
+                <div className="ml-4">
+                  <div className="h-4 bg-white/10 rounded mb-2"></div>
+                  <div className="h-8 bg-white/10 rounded"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-red-500/10 backdrop-blur-xl rounded-2xl p-6 border border-red-500/20">
+          <h1 className="text-2xl font-bold text-red-400 mb-2">Error Loading Dashboard</h1>
+          <p className="text-red-300 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-red-500/20 text-red-300 px-4 py-2 rounded-lg hover:bg-red-500/30 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -76,21 +137,25 @@ const FieldDashboard: React.FC = () => {
           </div>
 
           <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">Recent Shipments</h3>
             <div className="space-y-3">
-              {[
-                { action: "Scanned shipment SHP-001", time: "2 minutes ago" },
-                { action: "Checkpoint logged for SHP-002", time: "15 minutes ago" },
-                { action: "Delivered SHP-003", time: "1 hour ago" },
-              ].map((activity, index) => (
-                <div key={index} className="flex items-start space-x-3 p-3 bg-white/5 rounded-lg">
-                  <div className="flex-shrink-0 w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+              {shipments.slice(-3).reverse().map((shipment) => (
+                <div key={shipment.id} className="flex items-start space-x-3 p-3 bg-white/5 rounded-lg">
+                  <div className={`flex-shrink-0 w-2 h-2 rounded-full mt-2 ${
+                    shipment.status === 2 ? 'bg-green-400' : 
+                    shipment.status === 1 ? 'bg-yellow-400' : 'bg-blue-400'
+                  }`}></div>
                   <div className="flex-1">
-                    <p className="text-sm text-white">{activity.action}</p>
-                    <p className="text-xs text-white/60">{activity.time}</p>
+                    <p className="text-sm text-white">Shipment #{shipment.id} - {getStatusLabel(shipment.status)}</p>
+                    <p className="text-xs text-white/60">{shipment.description}</p>
                   </div>
                 </div>
               ))}
+              {shipments.length === 0 && (
+                <div className="text-center py-4">
+                  <p className="text-white/60">No shipments found</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
